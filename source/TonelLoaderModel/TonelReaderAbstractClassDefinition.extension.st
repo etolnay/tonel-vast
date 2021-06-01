@@ -144,14 +144,26 @@ TonelReaderAbstractClassDefinition >> isArtificiallyCreatedMethod: aCompiledMeth
  #vaCategories : ['loading'] }
 TonelReaderAbstractClassDefinition >> loadDeclarationMethodsInto: anApp using: aTonelLoader [
 
-	| concreteClass |
+	| concreteClass methods |
 	concreteClass := self concreteClassIn: anApp.
-	(self tonelMethods select: [:method | method isDeclaration]) do: 
-			[:aTonelMethod | 
-			aTonelMethod 
-				loadFor: concreteClass
-				into: anApp
-				using: aTonelLoader]
+	(methods := self tonelMethods select: [:each | each isDeclaration]) notEmpty
+		ifTrue: [
+			methods do: 
+				[:aTonelMethod | 
+				aTonelMethod 
+					loadFor: concreteClass
+					into: anApp
+					using: aTonelLoader].
+			EmInterface current rebuildNamespaceFor: anApp]
+]
+
+{ #category : '*TonelLoaderModel',
+ #vaCategories : ['loading'] }
+TonelReaderAbstractClassDefinition >> loadDeclarationsInto: anApp using: appLoader [
+
+	appLoader loader
+		changeUserTo: anApp manager
+		for: [self loadDeclarationMethodsInto: anApp using: appLoader].
 ]
 
 { #category : '*TonelLoaderModel',
@@ -175,7 +187,7 @@ TonelReaderAbstractClassDefinition >> loadMethodsInto: anApp using: aTonelLoader
 
 	| concreteClass |
 	concreteClass := self concreteClassIn: anApp.
-	self tonelMethods do: 
+	(self tonelMethods reject: [:each | each isDeclaration]) do:
 			[:aTonelMethod | 
 			aTonelMethod 
 				loadFor: concreteClass
