@@ -828,7 +828,7 @@ TonelLoaderSubApplication >> tonelExtendedClasses [
 { #category : 'loading',
   #vaVisibility : 'private' }
 TonelLoaderSubApplication >> topologicallySort: aDictionary in: anApp [
-	^(aDictionary values collect: [:each | each -> anApp]) tonelSingleEdgeTopologicallySortedCollection
+	^((aDictionary values sort: [:a :b| a name <= b name]) collect: [:each | each -> anApp]) tonelSingleEdgeTopologicallySortedCollection
 ]
 
 { #category : 'loading' }
@@ -836,20 +836,22 @@ TonelLoaderSubApplication >> updateSharedPoolsDefinitionOf: anApp [
 	"Updates the app class definition to reference the shared pools classes it declares."
 	
 	| updatedSharedPoolsNames |
-	updatedSharedPoolsNames := Set new.
-	updatedSharedPoolsNames addAll: anApp sharedPoolNames.
-	updatedSharedPoolsNames addAll: ((self definedSharedPools) collect: [:ea | ea identifier asSymbol]).
+	self definedSharedPools isEmpty
+		ifFalse: [
+			updatedSharedPoolsNames := Set new.
+			updatedSharedPoolsNames addAll: anApp sharedPoolNames.
+			updatedSharedPoolsNames addAll: ((self definedSharedPools) collect: [:ea | ea identifier asSymbol]).
 
-	anApp creatorClass
-		createClassNamed: anApp environmentKey
-		in: anApp environment
-		for: (anApp hasController ifTrue: [anApp controller] ifFalse: [nil])
-		subclassOf: anApp superclass
-		instanceShape: anApp instanceShape
-		classInstanceVariables: (anApp class instVarNames)
-		instanceVariables: (anApp instVarNames)
-		classVariables: (anApp classVarNames)
-		sharedPoolNames: updatedSharedPoolsNames asArray
+			anApp creatorClass
+				createClassNamed: anApp environmentKey
+				in: anApp environment
+				for: (anApp hasController ifTrue: [anApp controller] ifFalse: [nil])
+				subclassOf: anApp superclass
+				instanceShape: anApp instanceShape
+				classInstanceVariables: (anApp class instVarNames)
+				instanceVariables: (anApp instVarNames)
+				classVariables: (anApp classVarNames)
+				sharedPoolNames: updatedSharedPoolsNames asArray]
 	
 ]
 
