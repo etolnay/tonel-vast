@@ -117,6 +117,7 @@ TonelApplicationLoader >> createAndLoadApplication [
 		definePoolDictionaries;
 		createClasses;
 		prepareRemovedClasses;
+		loadApplicationDefinitions;
 		updateClassDefinitions;
 		deleteRemovedClasses;
 		loadApplication;
@@ -250,6 +251,13 @@ TonelApplicationLoader >> load [
 TonelApplicationLoader >> loadApplication [
 
 	self tonelApplication loadUsing: self
+]
+
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
+TonelApplicationLoader >> loadApplicationDefinitions [
+
+	self tonelApplication loadDefinitionsUsing: self
 ]
 
 { #category : 'accessing',
