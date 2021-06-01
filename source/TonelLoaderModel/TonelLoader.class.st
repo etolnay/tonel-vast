@@ -358,7 +358,7 @@ TonelLoader >> loadedConfigurationMaps [
 { #category : 'logging' }
 TonelLoader >> log: aString [
 
-	Transcript show: aString; cr.
+	Transcript cr; show: aString.
 ]
 
 { #category : 'strategies' }
