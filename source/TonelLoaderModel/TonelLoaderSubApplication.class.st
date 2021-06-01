@@ -527,6 +527,59 @@ TonelLoaderSubApplication >> loadClassesIn: anApp using: aLoader [
 	sortedClasses do: [:each | each key loadInto: anApp using: aLoader]
 ]
 
+{ #category : 'loading' }
+TonelLoaderSubApplication >> loadDefinitionsFor: tonelApp inRootApp: rootApp using: aLoader [
+
+	| theApp |
+
+	theApp := Smalltalk at: self identifier.
+	(theApp isNil or: [self hasChangesFor: theApp inRootApp: rootApp])
+		ifTrue: [
+			self
+				loadDefinitionsIn: theApp using: aLoader;
+				loadDefinitionsInSubApplicationsOf: theApp inRootApp: rootApp using: aLoader]
+]
+
+{ #category : 'loading' }
+TonelLoaderSubApplication >> loadDefinitionsIn: anApp using: aLoader [
+
+	"(self topologicallySort: self tonelExtendedClasses in: anApp) 
+		do: [:each | each key loadInto: anApp using: aLoader]."
+	
+	| sortedClasses |
+	sortedClasses := (self 
+		topologicallySort: (self tonelClasses reject: [:each1 | each1 isSharedPool])
+		in: anApp).
+
+	sortedClasses
+		do: [:each | each key loadDeclarationsInto: anApp using: aLoader]
+]
+
+{ #category : 'loading' }
+TonelLoaderSubApplication >> loadDefinitionsInSubApplicationsOf: anApp inRootApp: rootApp using: aLoader [
+
+	self subApplications do: 
+			[:tonelSubApp | 
+			tonelSubApp 
+				loadDefinitionsFor: self
+				inRootApp: rootApp
+				using: aLoader]
+]
+
+{ #category : 'loading' }
+TonelLoaderSubApplication >> loadDefinitionsUsing: aLoader [
+	"Load the real application for @aLoader."
+
+	| theApp |
+
+	theApp := Smalltalk classAt: self identifier.
+	(aLoader alwaysCreateEditions or: [self hasChanges])
+		ifTrue: [
+			self
+				loadDefinitionsIn: theApp using: aLoader;
+				loadDefinitionsInSubApplicationsOf: theApp inRootApp: theApp using: aLoader]
+]
+
 { #category : 'accessing' }
 TonelLoaderSubApplication >> loader [
 
